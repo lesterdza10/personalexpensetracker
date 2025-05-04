@@ -1,0 +1,278 @@
+/* styles.css */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --success-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --light-color: #ecf0f1;
+    --dark-color: #34495e;
+    --text-color: #333;
+    --border-radius: 5px;
+    --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: #f5f7fa;
+}
+
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1.5rem 0;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+h1, h2, h3 {
+    margin-bottom: 1rem;
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--box-shadow);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+}
+
+.amount {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.total-expenses .amount {
+    color: var(--danger-color);
+}
+
+.remaining-budget .amount {
+    color: var(--success-color);
+}
+
+.amount.negative {
+    color: var(--danger-color);
+}
+
+/* Main Sections */
+.main-sections {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .main-sections {
+        grid-template-columns: 1fr;
+    }
+}
+
+.section {
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--box-shadow);
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+input, select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+
+button {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.cancel-edit-btn {
+    background-color: var(--warning-color);
+    margin-left: 0.5rem;
+}
+
+.cancel-edit-btn:hover {
+    background-color: #e67e22;
+}
+
+/* Table Styles */
+.filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.filters select, .filters input {
+    flex: 1;
+    min-width: 120px;
+}
+
+#expenses-table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th, td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: var(--light-color);
+    font-weight: 600;
+}
+
+tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.edit-btn, .delete-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+}
+
+.edit-btn {
+    background-color: var(--warning-color);
+}
+
+.delete-btn {
+    background-color: var(--danger-color);
+}
+
+.edit-btn:hover {
+    background-color: #e67e22;
+}
+
+.delete-btn:hover {
+    background-color: #c0392b;
+}
+
+.no-expenses {
+    padding: 1rem;
+    text-align: center;
+    color: #777;
+    font-style: italic;
+}
+
+/* Chart */
+.chart-container {
+    height: 400px;
+    position: relative;
+    margin-top: 1rem;
+}
+
+/* Login & Register */
+.login-container {
+    max-width: 500px;
+    margin: 3rem auto;
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--box-shadow);
+}
+
+.login-form, .register-form {
+    margin-top: 1.5rem;
+}
+
+.login-form p, .register-form p {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.login-form a, .register-form a {
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+.login-form a:hover, .register-form a:hover {
+    text-decoration: underline;
+}
+
+.logout-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background-color: var(--danger-color);
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+}
+
+.logout-btn:hover {
+    background-color: #c0392b;
+}
+
+@media (max-width: 600px) {
+    .logout-btn {
+        position: static;
+        margin-top: 1rem;
+        display: block;
+        width: 100%;
+    }
+}

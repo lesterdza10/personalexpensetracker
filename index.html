@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Expense Tracker</title>
+    <link rel="stylesheet" href="style.css">
+        
+    
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Personal Expense Tracker</h1>
+            <p>Keep track of your spending and manage your budget</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="summary-cards">
+            <div class="card total-expenses">
+                <h3>Total Expenses</h3>
+                <p class="amount" id="total-expenses">$0.00</p>
+            </div>
+            <div class="card">
+                <h3>Monthly Budget</h3>
+                <p class="amount" id="monthly-budget">$1,000.00</p>
+            </div>
+            <div class="card remaining-budget">
+                <h3>Remaining Budget</h3>
+                <p class="amount" id="remaining-budget">$1,000.00</p>
+            </div>
+            <div class="card">
+                <h3>Top Category</h3>
+                <p class="amount" id="top-category">-</p>
+            </div>
+        </div>
+        
+        <div class="main-sections">
+            <div class="section">
+                <h2>Add New Expense</h2>
+                <form id="expense-form">
+                    <div class="form-group">
+                        <label for="expense-description">Description</label>
+                        <input type="text" id="expense-description" placeholder="What did you spend on?" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-amount">Amount ($)</label>
+                        <input type="number" id="expense-amount" min="0.01" step="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-category">Category</label>
+                        <select id="expense-category" required>
+                            <option value="">Select a category</option>
+                            <option value="Food">Food</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Housing">Housing</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Education">Education</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-date">Date</label>
+                        <input type="date" id="expense-date" required>
+                    </div>
+                    <button type="submit">Add Expense</button>
+                </form>
+            </div>
+            
+            <div class="section">
+                <h2>Recent Expenses</h2>
+                <div class="filters">
+                    <select id="filter-category">
+                        <option value="">All Categories</option>
+                        <option value="Food">Food</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Housing">Housing</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Education">Education</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="date" id="filter-from-date">
+                    <input type="date" id="filter-to-date">
+                    <button id="apply-filters">Filter</button>
+                </div>
+                
+                <div id="expenses-table-container">
+                    <table id="expenses-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenses-list">
+                            <!-- Expenses will be added here -->
+                        </tbody>
+                    </table>
+                    <div id="no-expenses-message" class="no-expenses">No expenses to display.</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section" style="margin-top: 30px;">
+            <h2>Spending Analytics</h2>
+            <div class="chart-container">
+                <canvas id="expenses-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date to today for new expenses
+            document.getElementById('expense-date').valueAsDate = new Date();
+            
+            // Initialize expenses array (temporary storage before database integration)
+            let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+            let monthlyBudget = parseFloat(localStorage.getItem('monthlyBudget')) || 1000;
+            
+            // Update UI with saved expenses
+            updateUI();
+            
+            // Add expense form submission
+            document.getElementById('expense-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const description = document.getElementById('expense-description').value;
+                const amount = parseFloat(document.getElementById('expense-amount').value);
+                const category = document.getElementById('expense-category').value;
+                const date = document.getElementById('expense-date').value;
+                
+                // Create expense object
+                const expense = {
+                    id: Date.now(), // temporary ID until database integration
+                    description,
+                    amount,
+                    category,
+                    date
+                };
+                
+                // Add to expenses array
+                expenses.push(expense);
+                
+                // Save to localStorage (temporary storage before database integration)
+                localStorage.setItem('expenses', JSON.stringify(expenses));
+                
+                // Reset form
+                this.reset();
+                document.getElementById('expense-date').valueAsDate = new Date();
+                
+                // Update UI
+                updateUI();
+            });
+            
+            // Apply filters button
+            document.getElementById('apply-filters').addEventListener('click', function() {
+                updateUI();
+            });
+            
+            // Handle expense deletion
+            document.addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('delete-btn')) {
+                    const expenseId = parseInt(e.target.getAttribute('data-id'));
+                    deleteExpense(expenseId);
+                }
+            });
+            
+            // Update UI elements with expense data
+            function updateUI() {
+                updateExpensesTable();
+                updateSummaryCards();
+                updateChart();
+            }
+            
+            // Filter expenses based on selected filters
+            function getFilteredExpenses() {
+                const categoryFilter = document.getElementById('filter-category').value;
+                const fromDateFilter = document.getElementById('filter-from-date').value;
+                const toDateFilter = document.getElementById('filter-to-date').value;
+                
+                return expenses.filter(expense => {
+                    // Apply category filter
+                    if (categoryFilter && expense.category !== categoryFilter) {
+                        return false;
+                    }
+                    
+                    // Apply date range filter
+                    if (fromDateFilter && expense.date < fromDateFilter) {
+                        return false;
+                    }
+                    
+                    if (toDateFilter && expense.date > toDateFilter) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+            }
+            
+            // Update the expenses table with filtered expenses
+            function updateExpensesTable() {
+                const filteredExpenses = getFilteredExpenses();
+                const tableBody = document.getElementById('expenses-list');
+                const noExpensesMessage = document.getElementById('no-expenses-message');
+                
+                // Clear table
+                tableBody.innerHTML = '';
+                
+                // Show/hide no expenses message
+                if (filteredExpenses.length === 0) {
+                    noExpensesMessage.style.display = 'block';
+                    return;
+                } else {
+                    noExpensesMessage.style.display = 'none';
+                }
+                
+                // Sort expenses by date (newest first)
+                filteredExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                // Add expenses to table
+                filteredExpenses.forEach(expense => {
+                    const row = document.createElement('tr');
+                    
+                    // Format date for display
+                    const formattedDate = new Date(expense.date).toLocaleDateString();
+                    
+                    row.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td>${expense.description}</td>
+                        <td>${expense.category}</td>
+                        <td>$${expense.amount.toFixed(2)}</td>
+                        <td><button class="delete-btn" data-id="${expense.id}">Delete</button></td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            }
+            
+            // Update summary cards
+            function updateSummaryCards() {
+                // Calculate total expenses
+                const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+                
+                // Find remaining budget
+                const remainingBudget = monthlyBudget - totalExpenses;
+                
+                // Find top category
+                const categoryTotals = {};
+                expenses.forEach(expense => {
+                    if (!categoryTotals[expense.category]) {
+                        categoryTotals[expense.category] = 0;
+                    }
+                    categoryTotals[expense.category] += expense.amount;
+                });
+                
+                let topCategory = '-';
+                let topAmount = 0;
+                
+                for (const category in categoryTotals) {
+                    if (categoryTotals[category] > topAmount) {
+                        topAmount = categoryTotals[category];
+                        topCategory = category;
+                    }
+                }
+                
+                // Update UI elements
+                document.getElementById('total-expenses').textContent = `$${totalExpenses.toFixed(2)}`;
+                document.getElementById('monthly-budget').textContent = `$${monthlyBudget.toFixed(2)}`;
+                document.getElementById('remaining-budget').textContent = `$${remainingBudget.toFixed(2)}`;
+                document.getElementById('top-category').textContent = topCategory;
+            }
+            
+            // Delete an expense
+            function deleteExpense(id) {
+                expenses = expenses.filter(expense => expense.id !== id);
+                localStorage.setItem('expenses', JSON.stringify(expenses));
+                updateUI();
+            }
+            
+            // Chart creation and updating
+            let expensesChart;
+            
+            function updateChart() {
+                // Get category totals for chart
+                const categories = {};
+                expenses.forEach(expense => {
+                    if (!categories[expense.category]) {
+                        categories[expense.category] = 0;
+                    }
+                    categories[expense.category] += expense.amount;
+                });
+                
+                const chartLabels = Object.keys(categories);
+                const chartData = Object.values(categories);
+                
+                // Generate colors for chart
+                const chartColors = chartLabels.map((_, index) => {
+                    const hue = (index * 137) % 360; // Golden ratio approximation for spreading colors
+                    return `hsl(${hue}, 70%, 60%)`;
+                });
+                
+                const ctx = document.getElementById('expenses-chart').getContext('2d');
+                
+                // Destroy previous chart if it exists
+                if (expensesChart) {
+                    expensesChart.destroy();
+                }
+                
+                // Create new chart
+                expensesChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            data: chartData,
+                            backgroundColor: chartColors,
+                            borderColor: 'white',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        return `${label}: $${value.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
